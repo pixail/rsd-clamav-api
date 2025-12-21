@@ -16,15 +16,14 @@ public static class HealthEndpoints
             .AllowAnonymous();
 
         app.MapGet("/version", async (IClamAvInfoService clam) =>
-        {
-            var version = await clam.GetVersionAsync();
-            return Results.Ok(new VersionResponse { ClamAvVersion = version });
-        })
-        .RequireAuthorization("CanRead")
-        .WithTags("Health")
-        .Produces<VersionResponse>(200)
-        .WithName("GetVersion")
-        .WithDescription("Get ClamAV version information");
+            {
+                var version = await clam.GetVersionAsync();
+                return Results.Ok(new VersionResponse { ClamAvVersion = version });
+            })
+            // .RequireAuthorization("CanRead")
+            .WithTags("Health")
+            .Produces<VersionResponse>(200)
+            .WithName("GetVersion")
+            .WithDescription("Get ClamAV version information");
     }
 }
-
