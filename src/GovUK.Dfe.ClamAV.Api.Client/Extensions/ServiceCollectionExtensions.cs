@@ -1,8 +1,6 @@
-﻿using GovUK.Dfe.ClamAV.Api.Client.Security;
-using GovUK.Dfe.ClamAV.Api.Client.Settings;
+﻿using GovUK.Dfe.ClamAV.Api.Client.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System.Diagnostics.CodeAnalysis;
 
 namespace GovUK.Dfe.ClamAV.Api.Client.Extensions
@@ -21,7 +19,9 @@ namespace GovUK.Dfe.ClamAV.Api.Client.Extensions
             configuration.GetSection("ClamAvApiClient").Bind(apiSettings);
 
             services.AddSingleton(apiSettings);
-            services.AddSingleton<ITokenAcquisitionService, TokenAcquisitionService>();
+
+            // Remove Azure AD token acquisition wiring
+            // services.AddSingleton<ITokenAcquisitionService, TokenAcquisitionService>();
 
             if (existingHttpClient != null)
             {
@@ -35,19 +35,22 @@ namespace GovUK.Dfe.ClamAV.Api.Client.Extensions
             else
             {
                 services.AddHttpClient<TClientInterface, TClientImplementation>((httpClient, serviceProvider) =>
-                    {
-                        httpClient.BaseAddress = new Uri(apiSettings.BaseUrl!);
+                {
+                    httpClient.BaseAddress = new Uri(apiSettings.BaseUrl!);
 
-                        return ActivatorUtilities.CreateInstance<TClientImplementation>(
-                            serviceProvider, httpClient, apiSettings.BaseUrl!);
-                    })
-                    .AddHttpMessageHandler(serviceProvider =>
-                    {
-                        var tokenService = serviceProvider.GetRequiredService<ITokenAcquisitionService>();
-                        var logger = serviceProvider.GetRequiredService<ILogger<BearerTokenHandler>>();
-                        return new BearerTokenHandler(tokenService, logger);
-                    });
+                    return ActivatorUtilities.CreateInstance<TClientImplementation>(
+                        serviceProvider, httpClient, apiSettings.BaseUrl!);
+                });
+
+                // Remove Bearer token handler that injected Authorization headers
+                // .AddHttpMessageHandler(serviceProvider =>
+                // {
+                //     var tokenService = serviceProvider.GetRequiredService<ITokenAcquisitionService>();
+                //     var logger = serviceProvider.GetRequiredService<ILogger<BearerTokenHandler>>();
+                //     return new BearerTokenHandler(tokenService, logger);
+                // });
             }
+
             return services;
         }
     }

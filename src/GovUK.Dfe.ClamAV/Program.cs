@@ -2,10 +2,10 @@ using GovUK.Dfe.ClamAV.Endpoints;
 using GovUK.Dfe.ClamAV.Handlers;
 using GovUK.Dfe.ClamAV.Services;
 using GovUK.Dfe.ClamAV.Swagger;
-using GovUK.Dfe.CoreLibs.Security.Authorization;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+// using GovUK.Dfe.CoreLibs.Security.Authorization;
+// using Microsoft.AspNetCore.Authentication.JwtBearer;
+// using Microsoft.Identity.Web;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,7 +43,8 @@ builder.Services.Configure<FormOptions>(o =>
 // builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 //     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
-builder.Services.AddApplicationAuthorization(builder.Configuration);
+// Disable application-level authorization wiring
+// builder.Services.AddApplicationAuthorization(builder.Configuration);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -52,21 +53,21 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "ClamAV Scan API",
         Version = "v1",
-        Description = "API wrapper for ClamAV virus scanning with async job support (Azure AD Secured)"
+        Description = "API wrapper for ClamAV virus scanning with async job support"
     });
 
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer"
-    });
+    // Remove Bearer security definition and operation filter to disable auth in Swagger
+    // c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    // {
+    //     Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+    //     Name = "Authorization",
+    //     In = ParameterLocation.Header,
+    //     Type = SecuritySchemeType.Http,
+    //     Scheme = "Bearer"
+    // });
 
-    c.OperationFilter<AuthenticationHeaderOperationFilter>();
+    // c.OperationFilter<AuthenticationHeaderOperationFilter>();
 });
-
 
 builder.Services.AddOpenApiDocument(configure => { configure.Title = "ClamAv Api"; });
 
