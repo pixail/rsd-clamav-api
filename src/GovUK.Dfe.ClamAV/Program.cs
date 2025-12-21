@@ -40,8 +40,8 @@ builder.Services.Configure<FormOptions>(o =>
 });
 
 // Add Azure AD authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+// builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
 builder.Services.AddApplicationAuthorization(builder.Configuration);
 
@@ -99,8 +99,8 @@ app.UseSwaggerUI(c =>
 });
 
 // Add authentication & authorization middleware
-app.UseAuthentication();
-app.UseAuthorization();
+// app.UseAuthentication();
+// app.UseAuthorization();
 
 // Map endpoints
 app.MapHealthEndpoints();
