@@ -1,11 +1,10 @@
 using GovUK.Dfe.ClamAV.Models;
-using nClam;
-
 namespace GovUK.Dfe.ClamAV.Services;
 
 public class ScanProcessingService(
     IScanJobService jobService,
-    IConfiguration configuration,
+    IClamAvScanner clamAvScanner,
+    IHttpClientFactory httpClientFactory,
     ILogger<ScanProcessingService> logger)
     : IScanProcessingService
 {
@@ -79,8 +78,7 @@ public class ScanProcessingService(
 
     private async Task<bool> DownloadFileAsync(string jobId, string url, string tempFilePath, long maxFileSize, CancellationToken cancellationToken)
     {
-        var httpClient = new HttpClient();
-        httpClient.Timeout = TimeSpan.FromMinutes(10);
+        using var httpClient = httpClientFactory.CreateClient("UrlScanner");
 
         try
         {
@@ -189,26 +187,14 @@ public class ScanProcessingService(
     {
         try
         {
-            var host = configuration["CLAMD_HOST"] ?? Environment.GetEnvironmentVariable("CLAMD_HOST") ?? "127.0.0.1";
-            var port = int.TryParse(configuration["CLAMD_PORT"] ?? Environment.GetEnvironmentVariable("CLAMD_PORT"), out var p) ? p : 3310;
-
-            var clam = new ClamClient(host, port);
-
             await using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            clam.MaxStreamSize = fileStream.Length;
-
-            var result = await clam.SendAndScanFileAsync(fileStream, cancellationToken);
-
-            return result.Result switch
+            var result = await clamAvScanner.ScanAsync(fileStream, cancellationToken);
+            return new ScanResult
             {
-                ClamScanResults.Clean => new ScanResult { IsSuccess = true, IsClean = true },
-                ClamScanResults.VirusDetected => new ScanResult
-                {
-                    IsSuccess = true,
-                    IsClean = false,
-                    MalwareName = result.InfectedFiles?.FirstOrDefault()?.VirusName ?? "unknown"
-                },
-                _ => new ScanResult { IsSuccess = false, Error = $"Unexpected result: {result.RawResult}" }
+                IsSuccess = result.IsSuccess,
+                IsClean = result.IsClean,
+                MalwareName = result.MalwareName,
+                Error = result.Error
             };
         }
         catch (Exception ex)

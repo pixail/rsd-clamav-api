@@ -1,7 +1,6 @@
 using GovUK.Dfe.ClamAV.Models;
 using GovUK.Dfe.ClamAV.Services;
 using GovUK.Dfe.CoreLibs.AsyncProcessing.Interfaces;
-using nClam;
 using System.Net;
 
 namespace GovUK.Dfe.ClamAV.Handlers;
@@ -10,44 +9,39 @@ public class FileScanHandler(
     IScanJobService jobService,
     IScanProcessingService scanProcessing,
     IBackgroundServiceFactory backgroundService,
-    IConfiguration configuration)
+    IClamAvScanner clamAvScanner)
 {
     public async Task<IResult> HandleSyncAsync(IFormFile file)
     {
         if (file == null || file.Length == 0)
             return Results.BadRequest(new ErrorResponse { Error = "Missing or empty file" });
 
-        var host = configuration["CLAMD_HOST"] ?? Environment.GetEnvironmentVariable("CLAMD_HOST") ?? "127.0.0.1";
-        var port = int.TryParse(configuration["CLAMD_PORT"] ?? Environment.GetEnvironmentVariable("CLAMD_PORT"), out var p) ? p : 3310;
-
-        var clam = new ClamClient(host, port) { MaxStreamSize = file.Length };
-
         await using var stream = file.OpenReadStream();
         var startTime = DateTime.UtcNow;
-        var result = await clam.SendAndScanFileAsync(stream);
+        var result = await clamAvScanner.ScanAsync(stream);
         var scanDuration = DateTime.UtcNow - startTime;
 
-        return result.Result switch
-        {
-            ClamScanResults.Clean => Results.Ok(new ScanResponse
+        if (!result.IsSuccess)
+            return Results.Problem($"Scan error: {result.Error}", statusCode: (int)HttpStatusCode.InternalServerError);
+
+        return result.IsClean
+            ? Results.Ok(new ScanResponse
             {
                 Status = "clean",
                 Engine = "clamav",
                 FileName = file.FileName,
                 Size = file.Length,
                 ScanDurationMs = scanDuration.TotalMilliseconds
-            }),
-            ClamScanResults.VirusDetected => Results.Ok(new ScanResponse
+            })
+            : Results.Ok(new ScanResponse
             {
                 Status = "infected",
                 Engine = "clamav",
-                Malware = result.InfectedFiles.FirstOrDefault()?.VirusName ?? "unknown",
+                Malware = result.MalwareName ?? "unknown",
                 FileName = file.FileName,
                 Size = file.Length,
                 ScanDurationMs = scanDuration.TotalMilliseconds
-            }),
-            _ => Results.Problem($"Scan error: {result.RawResult}", statusCode: (int)HttpStatusCode.InternalServerError)
-        };
+            });
     }
 
     public async Task<IResult> HandleAsyncAsync(IFormFile file)

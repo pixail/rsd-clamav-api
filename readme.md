@@ -388,8 +388,9 @@ docker compose down -v
 ## 🧑‍💻 Contributing
 
 1. Fork the repo and make changes in a new branch.  
-2. Run `docker compose up -d --build` to test locally.  
-3. Submit a PR with a clear description of your change.
+2. Run `dotnet test src/GovUK.Dfe.ClamAV.Tests/GovUK.Dfe.ClamAV.Tests.csproj -p:CI=true` for deterministic tests.
+3. Run `./scripts/smoke-test.sh` for a live container, clean-file, and EICAR check.
+4. Submit a PR with a clear description of your change.
 
 ---
 

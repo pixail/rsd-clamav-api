@@ -24,6 +24,18 @@ docker build --build-arg CI=true -t v2-clam-av:local .
 docker run --rm -p 8080:8080 v2-clam-av:local
 ```
 
+Run deterministic tests with:
+
+```bash
+dotnet test src/GovUK.Dfe.ClamAV.Tests/GovUK.Dfe.ClamAV.Tests.csproj -p:CI=true
+```
+
+Run the same live ClamAV smoke checks used by CI with:
+
+```bash
+./scripts/smoke-test.sh
+```
+
 `CI=true` skips NSwag regeneration during ordinary container builds. For a complete migration or client-generation change, also build the solution without that flag so the .NET 10 NSwag target runs, then inspect changes under `src/GovUK.Dfe.ClamAV.Api.Client/Generated`.
 
 Before deployment, check `/scan/jobs` and do not recreate the container while jobs are queued, downloading, or scanning. Validate `/healthz`, `/version`, a clean file, and the EICAR test file against a staging candidate.

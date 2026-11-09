@@ -51,7 +51,9 @@ builder.Services.AddOpenApiDocument(configure => { configure.Title = "ClamAv Api
 
 // Register services
 builder.Services.AddSingleton<IClamAvInfoService, ClamAvInfoService>();
+builder.Services.AddSingleton<IClamAvScanner, ClamAvScanner>();
 builder.Services.AddSingleton<IScanJobService, ScanJobService>();
+builder.Services.AddHttpClient("UrlScanner", client => client.Timeout = TimeSpan.FromMinutes(10));
 
 // Register processing service
 builder.Services.AddScoped<IScanProcessingService, ScanProcessingService>();
@@ -82,3 +84,5 @@ app.MapHealthEndpoints();
 app.MapScanEndpoints();
 
 app.Run();
+
+public partial class Program;
