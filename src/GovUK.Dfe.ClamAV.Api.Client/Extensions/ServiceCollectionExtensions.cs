@@ -20,9 +20,6 @@ namespace GovUK.Dfe.ClamAV.Api.Client.Extensions
 
             services.AddSingleton(apiSettings);
 
-            // Remove Azure AD token acquisition wiring
-            // services.AddSingleton<ITokenAcquisitionService, TokenAcquisitionService>();
-
             if (existingHttpClient != null)
             {
                 services.AddSingleton(existingHttpClient);
@@ -41,14 +38,6 @@ namespace GovUK.Dfe.ClamAV.Api.Client.Extensions
                     return ActivatorUtilities.CreateInstance<TClientImplementation>(
                         serviceProvider, httpClient, apiSettings.BaseUrl!);
                 });
-
-                // Remove Bearer token handler that injected Authorization headers
-                // .AddHttpMessageHandler(serviceProvider =>
-                // {
-                //     var tokenService = serviceProvider.GetRequiredService<ITokenAcquisitionService>();
-                //     var logger = serviceProvider.GetRequiredService<ILogger<BearerTokenHandler>>();
-                //     return new BearerTokenHandler(tokenService, logger);
-                // });
             }
 
             return services;

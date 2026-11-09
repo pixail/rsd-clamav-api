@@ -1,6 +1,6 @@
 ﻿# 🛡️ GovUK DfE ClamAV API Container
 
-A self-contained Dockerised antivirus scanning service built on **ClamAV** with a lightweight **.NET 8 HTTP API** and **Swagger UI**.
+A self-contained Dockerised antivirus scanning service built on **ClamAV** with a lightweight **.NET 10 HTTP API** and **Swagger UI**.
 
 This container runs the ClamAV engine and exposes a simple REST API for uploading and scanning files.  
 It’s designed for local development, testing, and service integration — all without needing to install ClamAV manually.
@@ -10,15 +10,15 @@ It’s designed for local development, testing, and service integration — all 
 ## 🚀 Features
 
 - 🧩 **All-in-one container** – ClamAV + REST API + Swagger.
-- 🔐 **Azure AD Authentication** – Secured with OAuth 2.0 client credentials flow.
+- 🧱 **Boundary-managed access** – The API has no application-level authentication and must be protected by its deployment boundary.
 - 🔄 **Automatic virus database updates** at start-up.
-- 🧠 **Swagger UI** for easy manual testing (`/swagger`) with OAuth2 support.
+- 🧠 **Swagger UI** for easy manual testing (`/swagger`).
 - 💬 **Endpoints** for scanning, health checks, and ClamAV version info.
 - ⚡ **Async scanning support** – Upload large files and poll for results (ideal for files >10MB).
 - 🌐 **URL scanning** – Download and scan files from URLs with Base64 support.
 - 🎯 **Performance optimized** – Tuned ClamAV settings + 4 concurrent workers for parallel processing.
 - 💾 **Persistent database volume** so virus definitions are reused between restarts.
-- 🔒 **Stateless HTTP interface** – ideal for CI pipelines or microservices.
+- 🔌 **Simple HTTP interface** – suitable for service-to-service integration behind a protected boundary.
 
 ---
 
@@ -183,7 +183,7 @@ flowchart TB
 │   ├── clamd.conf                      # ClamAV daemon configuration
 │   └── freshclam.conf                  # Freshclam configuration
 └── src/
-    └── GovUK.Dfe.ClamAV/               # .NET 8 API project
+    └── GovUK.Dfe.ClamAV/               # .NET 10 API project
         ├── Program.cs                  # Application entry point & DI configuration
         ├── Endpoints/                  # Endpoint route definitions
         │   ├── HealthEndpoints.cs      # Health check & version endpoints
@@ -358,9 +358,6 @@ Environment variables can be overridden in `docker-compose.yml`:
 | `CLAMD_PORT` | `3310` | ClamAV daemon port |
 | `MAX_FILE_SIZE_MB` | `200` | Max upload size |
 | `ASPNETCORE_ENVIRONMENT` | `Production` | .NET environment name |
-| `AzureAd__TenantId` | - | Azure AD Tenant ID |
-| `AzureAd__ClientId` | - | Azure AD Application (client) ID |
-| `AzureAd__Audience` | - | API audience (usually `api://{ClientId}`) |
 
 ---
 
