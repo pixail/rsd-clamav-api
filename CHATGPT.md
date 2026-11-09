@@ -15,6 +15,8 @@ The API does not enforce authentication or authorization. Treat the deployment's
 - `src/GovUK.Dfe.ClamAV.Api.Client`: generated C# client and NSwag configuration.
 - `.github/workflows`: deployment and NuGet client-package workflows.
 
+The API client packaging workflow uses GitVersion 6.8 through GitTools Actions 4.7. GitVersion 6 configuration uses `label`, not the removed v5 `tag` branch property. Package versions are assembled from `MajorMinorPatch`, `PreReleaseLabel`, and `PreReleaseNumber` so `main` remains stable and pull requests receive `prerelease.N` versions.
+
 ## Build and verification
 
 The supported local path is Docker because the service needs both .NET and ClamAV:
