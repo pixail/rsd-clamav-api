@@ -17,6 +17,8 @@ The API does not enforce authentication or authorization. Treat the deployment's
 
 The API client packaging workflow uses GitVersion 6.8 through GitTools Actions 4.7. GitVersion 6 configuration uses `label`, not the removed v5 `tag` branch property. Package versions are assembled from `MajorMinorPatch`, `PreReleaseLabel`, and `PreReleaseNumber` so `main` remains stable and pull requests receive `prerelease.N` versions.
 
+Pull requests build and validate the API client but do not invoke the secret-bearing NuGet release workflow. Packaging, NuGet publication, and GitHub release creation run only after a successful push to `main`, where the repository `NUGET_API_KEY` secret must be available.
+
 ## Build and verification
 
 The supported local path is Docker because the service needs both .NET and ClamAV:
