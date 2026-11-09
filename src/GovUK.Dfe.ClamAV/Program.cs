@@ -1,10 +1,6 @@
 using GovUK.Dfe.ClamAV.Endpoints;
 using GovUK.Dfe.ClamAV.Handlers;
 using GovUK.Dfe.ClamAV.Services;
-using GovUK.Dfe.ClamAV.Swagger;
-// using GovUK.Dfe.CoreLibs.Security.Authorization;
-// using Microsoft.AspNetCore.Authentication.JwtBearer;
-// using Microsoft.Identity.Web;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.OpenApi.Models;
 
@@ -39,13 +35,6 @@ builder.Services.Configure<FormOptions>(o =>
     o.BufferBody = false; // Don't buffer in memory
 });
 
-// Add Azure AD authentication
-// builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-
-// Disable application-level authorization wiring
-// builder.Services.AddApplicationAuthorization(builder.Configuration);
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -56,24 +45,15 @@ builder.Services.AddSwaggerGen(c =>
         Description = "API wrapper for ClamAV virus scanning with async job support"
     });
 
-    // Remove Bearer security definition and operation filter to disable auth in Swagger
-    // c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    // {
-    //     Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-    //     Name = "Authorization",
-    //     In = ParameterLocation.Header,
-    //     Type = SecuritySchemeType.Http,
-    //     Scheme = "Bearer"
-    // });
-
-    // c.OperationFilter<AuthenticationHeaderOperationFilter>();
 });
 
 builder.Services.AddOpenApiDocument(configure => { configure.Title = "ClamAv Api"; });
 
 // Register services
 builder.Services.AddSingleton<IClamAvInfoService, ClamAvInfoService>();
+builder.Services.AddSingleton<IClamAvScanner, ClamAvScanner>();
 builder.Services.AddSingleton<IScanJobService, ScanJobService>();
+builder.Services.AddHttpClient("UrlScanner", client => client.Timeout = TimeSpan.FromMinutes(10));
 
 // Register processing service
 builder.Services.AddScoped<IScanProcessingService, ScanProcessingService>();
@@ -99,12 +79,10 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "ClamAV Scan API v1");
 });
 
-// Add authentication & authorization middleware
-// app.UseAuthentication();
-// app.UseAuthorization();
-
 // Map endpoints
 app.MapHealthEndpoints();
 app.MapScanEndpoints();
 
 app.Run();
+
+public partial class Program;

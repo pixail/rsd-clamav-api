@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GovUK.Dfe.ClamAV", "GovUK.D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovUK.Dfe.ClamAV.Api.Client", "GovUK.Dfe.ClamAV.Api.Client\GovUK.Dfe.ClamAV.Api.Client.csproj", "{CCB2A5BE-600D-4B82-9609-8C1003AE20D1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovUK.Dfe.ClamAV.Tests", "GovUK.Dfe.ClamAV.Tests\GovUK.Dfe.ClamAV.Tests.csproj", "{D865E497-8E23-4E48-980B-6628741D44F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{CCB2A5BE-600D-4B82-9609-8C1003AE20D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CCB2A5BE-600D-4B82-9609-8C1003AE20D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CCB2A5BE-600D-4B82-9609-8C1003AE20D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D865E497-8E23-4E48-980B-6628741D44F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D865E497-8E23-4E48-980B-6628741D44F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D865E497-8E23-4E48-980B-6628741D44F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D865E497-8E23-4E48-980B-6628741D44F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

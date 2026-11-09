@@ -1,0 +1,73 @@
+name: Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  dotnet:
+    name: Build, test and audit
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: >-
+          dotnet restore src/GovUK.Dfe.ClamAV.sln
+          -p:NuGetAudit=true
+          -p:NuGetAuditMode=all
+          -p:WarningsAsErrors=NU1901%3BNU1902%3BNU1903%3BNU1904
+
+      - name: Build
+        run: dotnet build src/GovUK.Dfe.ClamAV.sln --configuration Release --no-restore -p:CI=true
+
+      - name: Test with coverage
+        run: >-
+          dotnet test src/GovUK.Dfe.ClamAV.Tests/GovUK.Dfe.ClamAV.Tests.csproj
+          --configuration Release
+          --no-build
+          --collect:"XPlat Code Coverage"
+          --results-directory TestResults
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-coverage
+          path: TestResults/**/coverage.cobertura.xml
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Audit NuGet packages
+        run: dotnet list src/GovUK.Dfe.ClamAV.sln package --vulnerable --include-transitive
+
+      - name: Validate Docker Compose
+        run: docker compose config --quiet
+
+  container:
+    name: Container smoke tests
+    runs-on: ubuntu-24.04
+    needs: dotnet
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Build and smoke test
+        run: ./scripts/smoke-test.sh

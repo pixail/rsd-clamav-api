@@ -24,22 +24,19 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
 
-      - name: Install GitVersion (v5)
-        uses: gittools/actions/gitversion/setup@v0.9
+      - name: Install GitVersion (v6)
+        uses: gittools/actions/gitversion/setup@v4.7.0
         with:
-          versionSpec: '5.x'
-
-      - name: Add .NET global tools to PATH
-        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+          versionSpec: '6.8.x'
 
       - name: Determine version
         id: gitversion
@@ -48,17 +45,16 @@ jobs:
             /overrideconfig tag-prefix="^${{ inputs.project_name }}-" \
             /showvariable MajorMinorPatch)
 
-          RAW_TAG=$(dotnet-gitversion \
+          LABEL=$(dotnet-gitversion \
             /overrideconfig tag-prefix="^${{ inputs.project_name }}-" \
-            /showvariable PreReleaseTag)
+            /showvariable PreReleaseLabel)
 
-          LABEL=${RAW_TAG%%[0-9]*}
           NUM=$(dotnet-gitversion \
             /overrideconfig tag-prefix="^${{ inputs.project_name }}-" \
             /showvariable PreReleaseNumber)
 
           if [ -n "$LABEL" ]; then
-            VERSION="${BASE}-${LABEL}-${NUM}"
+            VERSION="${BASE}-${LABEL}.${NUM}"
           else
             VERSION="$BASE"
           fi
@@ -117,4 +113,4 @@ jobs:
             --title "Release ${{ env.VERSION }} for ${{ inputs.project_name }}" \
             --notes "${{ env.RELEASE_NOTES }}" \
             --draft=false \
-            --prerelease=${{ github.event_name == 'pull_request' }} 
+            --prerelease=${{ github.event_name == 'pull_request' }}
